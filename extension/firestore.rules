@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isValidUserProfile() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['uid', 'fullName', 'email']) &&
+             data.uid is string &&
+             data.fullName is string && data.fullName.size() <= 100 &&
+             data.email is string && data.email.size() <= 100 &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() <= 50)) &&
+             (!('summary' in data) || (data.summary is string && data.summary.size() <= 5000)) &&
+             (!('experience' in data) || (data.experience is string && data.experience.size() <= 10000)) &&
+             (!('education' in data) || (data.education is string && data.education.size() <= 5000)) &&
+             (!('skills' in data) || (data.skills is string && data.skills.size() <= 2000)) &&
+             (!('updatedAt' in data) || data.updatedAt is string);
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile() && request.resource.data.uid == userId;
+      allow update: if isOwner(userId) && isValidUserProfile() && request.resource.data.uid == resource.data.uid;
+    }
+  }
+}
