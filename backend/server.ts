@@ -91,7 +91,7 @@ async function startServer() {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    const { rawWebpageText, resumeText } = req.body;
+    const { rawWebpageText, resumeText, enabledTools } = req.body;
 
     // 2. Define the onThought callback to push data to the client
     const onThought = (thought: string) => {
@@ -101,7 +101,7 @@ async function startServer() {
 
     try {
       // 3. Execute the Agentic Loop
-      const finalResult = await runAgenticLoop(rawWebpageText, resumeText, onThought);
+      const finalResult = await runAgenticLoop(rawWebpageText, resumeText, onThought, enabledTools);
       
       // 4. Push the final result
       const finalMessage = JSON.stringify({ type: 'result', content: finalResult });
