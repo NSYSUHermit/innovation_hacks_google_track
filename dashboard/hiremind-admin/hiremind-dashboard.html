@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HireMind — Intelligence Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+              mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+            },
+            colors: {
+              page: "#f9fafc",
+              border: "#e3e8ee",
+              navy: "#0f1520",
+              brand: {
+                50: "#f4f7fe",
+                100: "#e8edfc",
+                500: "#6366f1",
+                600: "#4f56e5",
+                700: "#4347d0",
+              },
+              semantic: { green: "#57b885", amber: "#eaa234", red: "#dc534d", blue: "#4f7ffb" },
+            },
+            boxShadow: {
+              glass: "0 1px 2px rgba(15,21,32,0.04), 0 8px 24px rgba(15,21,32,0.06)",
+            },
+            borderRadius: { card: "12px" },
+          },
+        },
+      };
+    </script>
+    <style>
+      .glass-panel {
+        border-radius: 12px;
+        border: 1px solid #e3e8ee;
+        background: rgba(255, 255, 255, 0.85);
+        box-shadow: 0 1px 2px rgba(15, 21, 32, 0.04), 0 8px 24px rgba(15, 21, 32, 0.06);
+        backdrop-filter: blur(12px);
+      }
+      .dark .glass-panel {
+        border-color: #27272a;
+        background: rgba(24, 24, 27, 0.72);
+      }
+      body {
+        font-family: Inter, system-ui, sans-serif;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+  </head>
+  <body
+    class="min-h-full bg-page text-navy antialiased dark:bg-[#0b0f14] dark:text-zinc-100"
+  >
+    <!-- Sidebar: Dashboard, Analytics (active), AI Insights (+dot), Users, Applications, Settings, Logout -->
+    <aside
+      id="sidebar"
+      class="fixed left-0 top-0 z-40 flex h-screen w-60 flex-col border-r border-border bg-white transition-[width] duration-200 dark:border-zinc-800 dark:bg-zinc-950"
+    >
+      <div class="flex h-14 items-center justify-between border-b border-border px-3 dark:border-zinc-800">
+        <div class="flex min-w-0 items-center gap-2">
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-500 text-white shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>
+          </div>
+          <span id="brand-text" class="truncate font-semibold tracking-tight">HireMind</span>
+        </div>
+        <button
+          type="button"
+          id="sidebar-toggle"
+          class="rounded-lg p-1.5 text-zinc-500 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-zinc-800"
+          aria-label="Collapse sidebar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+      </div>
+      <nav id="side-nav" class="flex flex-1 flex-col gap-y-1 overflow-y-auto px-2 py-4">
+        <button type="button" data-nav="dashboard" class="nav-item flex w-full items-center gap-3 rounded-xl bg-brand-500 px-2.5 py-2.5 text-left text-sm font-medium text-white shadow-sm dark:bg-brand-500">
+          <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+          <span class="nav-label">Dashboard</span>
+        </button>
+        <button type="button" data-nav="ai-insights" class="nav-item flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800">
+          <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+          <span class="nav-label flex-1">AI Insights</span>
+          <span class="ai-dot h-2 w-2 shrink-0 rounded-full bg-semantic-blue"></span>
+        </button>
+        <button type="button" data-nav="applications" class="nav-item flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800">
+          <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+          <span class="nav-label">Applications</span>
+        </button>
+        <button type="button" data-nav="users" class="nav-item flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800">
+          <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span class="nav-label">Users</span>
+        </button>
+        <button type="button" data-nav="settings" class="nav-item flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800">
+          <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="nav-label">Settings</span>
+        </button>
+      </nav>
+      <div class="border-t border-border p-2 dark:border-zinc-800">
+        <button type="button" id="logout-btn" class="flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-medium text-[#dc534d] hover:bg-red-50 dark:hover:bg-red-950/30">
+          <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          <span class="nav-label">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div id="main-wrap" class="min-h-screen transition-[margin] duration-200" style="margin-left: 240px">
+      <!-- Top nav -->
+      <header class="sticky top-0 z-30 border-b border-border bg-page/80 backdrop-blur-md dark:border-zinc-800 dark:bg-[#0b0f14]/80">
+        <div class="flex flex-wrap items-center gap-3 px-4 py-2 lg:h-14 lg:flex-nowrap lg:gap-4 lg:px-6">
+          <div class="relative min-w-0 flex-1 basis-full lg:max-w-2xl lg:basis-auto">
+            <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input
+              id="global-search"
+              type="search"
+              placeholder="Search candidates, jobs, or insights…"
+              class="w-full rounded-[12px] border border-border bg-white py-2 pl-9 pr-4 text-sm shadow-sm outline-none ring-brand-500/20 placeholder:text-zinc-400 focus:border-brand-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900"
+            />
+          </div>
+          <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+            <button type="button" id="theme-toggle" class="rounded-[12px] border border-border bg-white p-2 text-zinc-600 hover:bg-brand-50 dark:border-zinc-700 dark:bg-zinc-900" aria-label="Toggle theme">
+              <svg id="icon-sun" class="hidden h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+              <svg id="icon-moon" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+            <button type="button" class="relative rounded-[12px] border border-border bg-white p-2 dark:border-zinc-700 dark:bg-zinc-900" aria-label="Notifications">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              <span class="absolute right-1 top-1 h-2 w-2 rounded-full bg-semantic-red"></span>
+            </button>
+            <div class="hidden items-center gap-3 border-l border-border pl-3 sm:flex dark:border-zinc-700">
+              <div class="text-right leading-tight">
+                <p class="text-sm font-semibold">Alex Rivera</p>
+                <p class="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Platform admin</p>
+              </div>
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-brand-100 text-xs font-bold text-brand-800 dark:border-zinc-600 dark:bg-brand-900/40 dark:text-brand-200">AR</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1 px-4 pb-10 pt-6 lg:px-6">
+        <div class="mx-auto max-w-[1400px]">
+          <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <header>
+              <h1 id="page-title" class="text-2xl font-bold tracking-tight">Dashboard</h1>
+              <p id="page-sub" class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Welcome back, Alex. Here's what's happening today.</p>
+            </header>
+            <div class="flex shrink-0 flex-wrap items-center gap-2">
+              <label for="comparison-period" class="sr-only">Comparison period for KPI changes</label>
+              <select
+                id="comparison-period"
+                title="Basis for KPI change indicators"
+                class="max-w-[min(100vw-2rem,220px)] rounded-[12px] border border-border bg-white py-2 pl-3 pr-8 text-xs font-medium text-navy shadow-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+              >
+                <option value="day">Today vs Yesterday</option>
+                <option value="week" selected>This Week vs Last Week</option>
+                <option value="month">This Month vs Last Month</option>
+                <option value="quarter">This Quarter vs Last Quarter</option>
+                <option value="year">This Year vs Last Year</option>
+              </select>
+              <button type="button" id="btn-filters" class="inline-flex items-center gap-1.5 rounded-[12px] border border-border bg-brand-50 px-3 py-2 text-sm font-medium text-navy hover:bg-brand-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Filters
+              </button>
+              <button type="button" id="btn-export" class="inline-flex items-center gap-1.5 rounded-[12px] bg-brand-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- 12-col grid -->
+          <div id="main-grid" class="grid grid-cols-12 gap-4 lg:gap-5">
+            <div id="view-dashboard" class="col-span-12 grid grid-cols-12 gap-4 lg:gap-5">
+            <!-- KPI row -->
+            <div class="col-span-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 lg:gap-4" id="kpi-row"></div>
+
+            <div class="col-span-12 xl:col-span-8 glass-panel p-4 lg:p-5">
+              <div class="mb-4">
+                <h3 class="text-sm font-semibold">User growth</h3>
+                <p id="growth-sub" class="text-xs text-zinc-500 dark:text-zinc-400">Registered job seekers — last 6 months</p>
+              </div>
+              <div class="h-[260px]"><canvas id="chart-growth"></canvas></div>
+            </div>
+
+            <div class="col-span-12 xl:col-span-4 glass-panel p-4 lg:p-5">
+              <div class="mb-4">
+                <h3 class="text-sm font-semibold">Conversion funnel</h3>
+                <p id="funnel-sub" class="text-xs text-zinc-500 dark:text-zinc-400">Signups → applied → interview → offer</p>
+              </div>
+              <div id="funnel-wrap" class="space-y-3"></div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-7 glass-panel p-4 lg:p-5">
+              <div class="mb-4">
+                <h3 class="text-sm font-semibold">Applications by industry</h3>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">Volume across tracked verticals</p>
+              </div>
+              <div class="h-[260px]"><canvas id="chart-bar"></canvas></div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-5 glass-panel p-4 lg:p-5">
+              <div class="mb-2">
+                <h3 class="text-sm font-semibold">Industry mix</h3>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">Share of total applications</p>
+              </div>
+              <div class="h-[240px]"><canvas id="chart-pie"></canvas></div>
+            </div>
+
+            <!-- AI Insights -->
+            <section id="section-insights" class="col-span-12 glass-panel p-4 lg:p-5">
+              <div class="mb-4 flex items-center gap-2">
+                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500 text-white">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold">AI insights</h3>
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400">Actionable signals — refreshed hourly</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-12 gap-3" id="insights-grid"></div>
+            </section>
+
+            <!-- University analytics (full — matches React app) -->
+            <div class="col-span-12 glass-panel p-4 lg:p-5" id="section-university">
+              <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex items-center gap-2">
+                  <svg class="h-5 w-5 shrink-0 text-brand-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                  <div>
+                    <h3 class="text-sm font-semibold text-navy dark:text-white">University analytics</h3>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">Campus pipeline — filters apply per chart (school vs degree vs major)</p>
+                  </div>
+                </div>
+                <div class="flex flex-wrap items-end gap-3">
+                  <label class="flex flex-col gap-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">School
+                    <select id="uni-school" class="min-w-[200px] rounded-[12px] border border-border bg-white px-3 py-2 text-sm font-medium text-navy dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"></select>
+                  </label>
+                  <label class="flex flex-col gap-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Degree
+                    <select id="uni-degree" class="min-w-[130px] rounded-[12px] border border-border bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"></select>
+                  </label>
+                  <label class="flex flex-col gap-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Major
+                    <select id="uni-major" class="min-w-[170px] rounded-[12px] border border-border bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"></select>
+                  </label>
+                  <button type="button" id="btn-export-university" class="inline-flex items-center gap-1.5 rounded-[12px] border border-border bg-brand-50 px-3 py-2 text-sm font-medium text-navy hover:bg-brand-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                    Export CSV
+                  </button>
+                </div>
+              </div>
+              <div class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <div class="rounded-lg border border-border bg-brand-50/50 p-3 dark:border-zinc-800 dark:bg-zinc-800/40">
+                  <p class="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Employment rate</p>
+                  <p class="mt-1 font-mono text-2xl font-bold text-navy dark:text-white" id="uni-kpi-er">72%</p>
+                  <p class="mt-0.5 text-[10px] text-zinc-500">Cohort estimate (school → major → degree)</p>
+                </div>
+                <div class="rounded-lg border border-border bg-brand-50/50 p-3 dark:border-zinc-800 dark:bg-zinc-800/40">
+                  <p class="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Avg time to job</p>
+                  <p class="mt-1 font-mono text-2xl font-bold text-navy dark:text-white"><span id="uni-kpi-tj">3.2</span> <span class="text-sm font-semibold text-zinc-500">mo</span></p>
+                </div>
+                <div class="rounded-lg border border-border bg-brand-50/50 p-3 dark:border-zinc-800 dark:bg-zinc-800/40">
+                  <p class="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Top industries</p>
+                  <ul id="uni-top-industries" class="mt-1 space-y-1 text-xs text-navy dark:text-zinc-200"></ul>
+                </div>
+                <div class="rounded-lg border border-border bg-brand-50/50 p-3 dark:border-zinc-800 dark:bg-zinc-800/40">
+                  <p class="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">Cohort note</p>
+                  <p class="mt-1 text-xs leading-snug text-zinc-600 dark:text-zinc-400" id="uni-cohort-note"></p>
+                </div>
+              </div>
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 lg:col-span-6 rounded-[12px] border border-border p-4 dark:border-zinc-800">
+                  <h4 class="text-xs font-semibold text-navy dark:text-white">Employment rate by university</h4>
+                  <p class="text-[11px] text-zinc-500">Filtered by <span class="font-medium">school</span> only</p>
+                  <div class="mt-3 h-[220px]"><canvas id="chart-uni-employment"></canvas></div>
+                </div>
+                <div class="col-span-12 lg:col-span-6 rounded-[12px] border border-border p-4 dark:border-zinc-800">
+                  <h4 class="text-xs font-semibold text-navy dark:text-white">Employment rate by degree</h4>
+                  <p class="text-[11px] text-zinc-500" id="uni-sub-degree">All degree levels</p>
+                  <div class="mt-3 h-[220px]"><canvas id="chart-uni-degree"></canvas></div>
+                </div>
+                <div class="col-span-12 lg:col-span-6 rounded-[12px] border border-border p-4 dark:border-zinc-800">
+                  <h4 class="text-xs font-semibold text-navy dark:text-white">Employment rate by major</h4>
+                  <p class="text-[11px] text-zinc-500" id="uni-sub-major">All majors</p>
+                  <div class="mt-3 h-[220px]"><canvas id="chart-uni-major"></canvas></div>
+                </div>
+                <div class="col-span-12 lg:col-span-6 rounded-[12px] border border-border p-4 dark:border-zinc-800">
+                  <h4 class="text-xs font-semibold text-navy dark:text-white">Time-to-job by education</h4>
+                  <p class="text-[11px] text-zinc-500" id="uni-sub-time">All levels</p>
+                  <div class="mt-3 h-[220px]"><canvas id="chart-uni-time"></canvas></div>
+                </div>
+              </div>
+              <div class="mt-6 grid grid-cols-12 gap-3" id="uni-ai-grid"></div>
+              <div class="mt-4 flex gap-2 rounded-lg border border-semantic-amber/30 bg-amber-50/80 p-3 dark:border-amber-900/40 dark:bg-amber-950/25">
+                <span class="text-semantic-amber">✦</span>
+                <p class="text-xs leading-relaxed text-amber-950 dark:text-amber-100"><span class="font-semibold">Curriculum AI: </span>CS &amp; DS majors show the largest lift from SQL + one shipped project—align modules to your major filter.</p>
+              </div>
+            </div>
+
+            <!-- Recruitment insights (full) -->
+            <div class="col-span-12 glass-panel p-4 lg:p-5" id="section-recruitment">
+              <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="flex items-center gap-2">
+                  <svg class="h-5 w-5 text-brand-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+                  <div>
+                    <h3 class="text-sm font-semibold text-navy dark:text-white">Recruitment insights</h3>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">Match thresholds, cross-employer comparison, response curve</p>
+                  </div>
+                </div>
+                <button type="button" id="btn-export-recruitment" class="inline-flex shrink-0 items-center gap-1.5 rounded-[12px] border border-border bg-brand-50 px-3 py-2 text-sm font-medium text-navy hover:bg-brand-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                  Export CSV
+                </button>
+              </div>
+              <dl class="mb-6 grid grid-cols-1 gap-3 border-b border-border pb-6 sm:grid-cols-3 dark:border-zinc-800">
+                <div class="rounded-lg border border-border bg-brand-50/50 p-3 dark:border-zinc-800 dark:bg-zinc-800/40">
+                  <dt class="text-xs text-zinc-500">Time-to-hire</dt>
+                  <dd class="font-mono text-xl font-semibold text-navy dark:text-white">21 <span class="text-xs font-medium text-zinc-500">days</span></dd>
+                </div>
+                <div class="rounded-lg border border-border bg-brand-50/50 p-3 dark:border-zinc-800 dark:bg-zinc-800/40">
+                  <dt class="text-xs text-zinc-500">Candidate quality score</dt>
+                  <dd class="font-mono text-xl font-semibold text-navy dark:text-white">7.8 <span class="text-xs font-medium text-zinc-500">/ 10</span></dd>
+                </div>
+                <div class="rounded-lg border border-border bg-brand-50/50 p-3 dark:border-zinc-800 dark:bg-zinc-800/40">
+                  <dt class="text-xs text-zinc-500">Best source</dt>
+                  <dd class="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                    <span class="rounded-full bg-brand-50 px-2 py-0.5 font-medium text-brand-800 dark:bg-brand-500/20 dark:text-brand-200">HireMind AI matching</span>
+                    <span class="font-mono font-semibold">45%</span>
+                  </dd>
+                </div>
+              </dl>
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 lg:col-span-6 rounded-[12px] border border-border p-4 dark:border-zinc-800">
+                  <h4 class="text-xs font-semibold text-navy dark:text-white">Minimum match score by employer</h4>
+                  <p class="text-[11px] text-zinc-500">Google-tier ~90 · startup ~65–70</p>
+                  <div class="mt-3 h-[260px]"><canvas id="chart-rec-threshold"></canvas></div>
+                  <ul class="mt-2 space-y-1 text-[11px] text-zinc-600 dark:text-zinc-400" id="rec-threshold-list"></ul>
+                </div>
+                <div class="col-span-12 lg:col-span-6 rounded-[12px] border border-border p-4 dark:border-zinc-800">
+                  <h4 class="text-xs font-semibold text-navy dark:text-white">Same candidate, different employers</h4>
+                  <p class="mb-3 text-[11px] text-zinc-500" id="rec-cross-intro"></p>
+                  <div class="overflow-x-auto rounded-lg border border-border dark:border-zinc-800">
+                    <table class="w-full min-w-[480px] text-left text-xs">
+                      <thead>
+                        <tr class="border-b border-border bg-zinc-50/80 text-[10px] font-semibold uppercase text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/50">
+                          <th class="px-3 py-2">Employer</th>
+                          <th class="px-3 py-2">Type</th>
+                          <th class="px-3 py-2">Match</th>
+                          <th class="px-3 py-2">Bar</th>
+                          <th class="px-3 py-2">Outcome</th>
+                        </tr>
+                      </thead>
+                      <tbody id="rec-cross-tbody"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="col-span-12 rounded-[12px] border border-border p-4 dark:border-zinc-800">
+                  <h4 class="text-xs font-semibold text-navy dark:text-white">Match score vs. response rate</h4>
+                  <p class="text-[11px] text-zinc-500">Aggregate human-response % by match band</p>
+                  <div class="mt-3 h-[260px]"><canvas id="chart-rec-scatter"></canvas></div>
+                </div>
+              </div>
+              <div class="mt-6 grid grid-cols-12 gap-3" id="rec-ai-grid"></div>
+            </div>
+
+            <!-- Platform performance by segment -->
+            <section id="section-apps" class="col-span-12 glass-panel overflow-hidden">
+              <div class="flex flex-col gap-4 border-b border-border p-4 dark:border-zinc-800">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h3 class="text-sm font-semibold text-navy dark:text-white">Platform Performance by Segment</h3>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">Aggregated outcomes across user segments — measuring platform effectiveness</p>
+                    <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400" id="table-count"></p>
+                    <p class="mt-0.5 text-[10px] text-zinc-500 dark:text-zinc-400" id="segment-kpi-hint"></p>
+                  </div>
+                  <div class="flex flex-1 flex-wrap items-center gap-2 sm:max-w-xl sm:justify-end">
+                    <div class="relative min-w-[200px] flex-1">
+                      <svg class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                      <input id="table-search" type="search" placeholder="Search segments…" class="w-full rounded-lg border border-border bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-brand-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900" />
+                    </div>
+                    <div class="relative">
+                      <svg class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                      <select id="trend-filter" class="appearance-none rounded-lg border border-border bg-brand-50 py-2 pl-8 pr-8 text-sm font-medium text-navy outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
+                        <option value="All">All trends</option>
+                        <option value="↑">↑ Improving</option>
+                        <option value="→">→ Flat</option>
+                        <option value="↓">↓ Declining</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex gap-2 rounded-lg border border-brand-200/80 bg-brand-50/70 p-3 dark:border-brand-500/20 dark:bg-brand-500/10">
+                  <svg class="mt-0.5 h-4 w-4 shrink-0 text-brand-600 dark:text-brand-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                  <p class="text-xs leading-relaxed text-navy dark:text-zinc-200"><span class="font-semibold text-brand-700 dark:text-brand-300">AI Insight: </span><span id="segment-ai-inline"></span></p>
+                </div>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full min-w-[960px] text-left text-sm">
+                  <thead>
+                    <tr class="border-b border-border bg-zinc-50/80 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+                      <th class="px-4 py-3">Segment</th>
+                      <th class="px-4 py-3">Total Applications</th>
+                      <th class="px-4 py-3">Avg Match Score</th>
+                      <th class="px-4 py-3">Interview Rate</th>
+                      <th class="px-4 py-3">Offer Rate</th>
+                      <th class="px-4 py-3">Avg Response Time (days)</th>
+                      <th class="px-4 py-3">Trend</th>
+                    </tr>
+                  </thead>
+                  <tbody id="app-tbody"></tbody>
+                </table>
+              </div>
+            </section>
+            </div>
+            <div id="view-users" class="col-span-12 hidden">
+              <div class="glass-panel overflow-hidden">
+                <div class="border-b border-border p-4 dark:border-zinc-800">
+                  <h2 class="text-sm font-semibold">Team & access</h2>
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400">Manage platform users and roles</p>
+                </div>
+                <div class="divide-y divide-border dark:divide-zinc-800">
+                  <div class="flex items-center justify-between px-4 py-3 text-sm"><span class="font-medium">Alex Rivera</span><span class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">Active</span></div>
+                  <div class="flex items-center justify-between px-4 py-3 text-sm"><span class="font-medium">Jordan Lee</span><span class="text-xs text-zinc-500">Recruiter</span></div>
+                  <div class="flex items-center justify-between px-4 py-3 text-sm"><span class="font-medium">Sam Patel</span><span class="text-xs text-amber-700">Invited</span></div>
+                </div>
+              </div>
+            </div>
+            <div id="view-settings" class="col-span-12 hidden">
+              <div class="glass-panel p-6">
+                <h2 class="text-sm font-semibold">Workspace</h2>
+                <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Timezone, notifications, security — connect your IdP in production.</p>
+                <label class="mt-4 block text-xs font-medium text-zinc-500">Default timezone</label>
+                <select class="mt-1 w-full rounded-[12px] border border-border bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"><option>UTC−08:00 Pacific</option></select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Dashboard filters (industry + date range) -->
+    <div
+      id="filter-overlay"
+      class="fixed inset-0 z-50 hidden items-end justify-center p-4 sm:items-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="filter-title"
+    >
+      <button
+        type="button"
+        id="filter-backdrop"
+        class="absolute inset-0 bg-navy/40 backdrop-blur-sm dark:bg-black/60"
+        aria-label="Close filters"
+      ></button>
+      <div class="relative w-full max-w-md rounded-[12px] border border-border bg-white p-5 shadow-xl dark:border-zinc-700 dark:bg-zinc-900">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 id="filter-title" class="text-sm font-semibold text-navy dark:text-white">Filters</h2>
+          <button
+            type="button"
+            id="filter-close-x"
+            class="rounded-lg p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+        <label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400">Industry</label>
+        <select
+          id="filter-draft-industry"
+          class="mt-1 w-full rounded-[12px] border border-border bg-white px-3 py-2 text-sm text-navy outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+        >
+          <option value="All">All industries</option>
+          <option value="Tech">Tech</option>
+          <option value="Finance">Finance</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Design">Design</option>
+          <option value="Operations">Operations</option>
+        </select>
+        <label class="mt-4 block text-xs font-medium text-zinc-500 dark:text-zinc-400">Date range</label>
+        <select
+          id="filter-draft-range"
+          class="mt-1 w-full rounded-[12px] border border-border bg-white px-3 py-2 text-sm text-navy outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+        >
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+          <option value="3m">Last 3 months</option>
+          <option value="6m" selected>Last 6 months</option>
+          <option value="12m">Last 12 months</option>
+        </select>
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-2">
+          <button
+            type="button"
+            id="filter-reset"
+            class="rounded-[12px] border border-border px-4 py-2 text-sm font-medium text-navy hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          >
+            Reset
+          </button>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              id="filter-close-btn"
+              class="rounded-[12px] border border-border px-4 py-2 text-sm font-medium text-navy hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              id="filter-apply"
+              class="rounded-[12px] bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const DATA = {
+        kpi: [
+          { id: "seekers", label: "Total Job Seekers", value: 12450, change: 12, up: true, spark: [8200, 9100, 9800, 10500, 11200, 11800, 12450] },
+          { id: "active", label: "Active Users", value: 3240, change: 5, up: true, spark: [2400, 2580, 2700, 2850, 2980, 3120, 3240] },
+          { id: "apps", label: "Total Applications", value: 28300, change: 18, up: true, spark: [18200, 19800, 21500, 23200, 24800, 26500, 28300] },
+          { id: "interview", label: "Interview Rate", value: 18, suffix: "%", change: 2, up: true, spark: [14, 15, 15, 16, 17, 17, 18] },
+          { id: "offer", label: "Offer Rate", value: 6, suffix: "%", change: 1, up: false, spark: [8, 7.5, 7.2, 6.8, 6.5, 6.2, 6] },
+        ],
+        growth: [
+          { month: "Jan", users: 4000 },
+          { month: "Feb", users: 5200 },
+          { month: "Mar", users: 6800 },
+          { month: "Apr", users: 8500 },
+          { month: "May", users: 10200 },
+          { month: "Jun", users: 12450 },
+        ],
+        funnel: [
+          { name: "Signups", value: 12450, fill: "#6366f1" },
+          { name: "Applied", value: 8200, fill: "#7c93e8" },
+          { name: "Interview", value: 2200, fill: "#9eb4ef" },
+          { name: "Offer", value: 750, fill: "#c7d4f7" },
+        ],
+        industries: [
+          { industry: "Tech", value: 9200 },
+          { industry: "Finance", value: 5400 },
+          { industry: "Marketing", value: 4100 },
+          { industry: "Design", value: 2100 },
+          { industry: "Operations", value: 1500 },
+        ],
+        insights: [
+          { title: "Tech volume vs. conversion", body: "Tech roles have high application volume but a low interview rate (12%)—prioritize screening quality over volume.", cls: "border-amber-200/80 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30" },
+          { title: "Skills gap signal", body: "Candidates lacking Python & SQL show 35% lower success in data-facing roles. Surface upskill nudges at apply-time.", cls: "border-blue-200/80 bg-blue-50/70 dark:border-blue-900/50 dark:bg-blue-950/30" },
+          { title: "Marketing outperforms", body: "Marketing roles show the highest conversion to interview at 22%—replicate messaging templates from top-performing listings.", cls: "border-emerald-200/80 bg-emerald-50/70 dark:border-emerald-900/50 dark:bg-emerald-950/30" },
+          { title: "Design portfolio lift", body: "Recommend users improve portfolio depth for Design roles—median time-to-interview drops 9 days when 3+ case studies are linked.", cls: "border-violet-200/80 bg-violet-50/70 dark:border-violet-900/50 dark:bg-violet-950/30" },
+        ],
+        segmentAIInsight:
+          "Users with AI-assisted resumes show +15 match score and +60% higher interview rate compared to non-AI users.",
+        segments: [
+          { segment: "Tech roles", applications: 9200, matchScore: 81, interviewRate: 21, offerRate: 7, responseTime: 5.2, trend: "↑" },
+          { segment: "Finance roles", applications: 5400, matchScore: 76, interviewRate: 17, offerRate: 6, responseTime: 6.8, trend: "→" },
+          { segment: "Marketing roles", applications: 4100, matchScore: 74, interviewRate: 18, offerRate: 6, responseTime: 6.2, trend: "→" },
+          { segment: "Users with AI-assisted resume", applications: 11200, matchScore: 84, interviewRate: 24, offerRate: 8, responseTime: 4.2, trend: "↑" },
+          { segment: "Users without AI assistance", applications: 8100, matchScore: 69, interviewRate: 15, offerRate: 4, responseTime: 7.6, trend: "↓" },
+          { segment: "Bachelor students", applications: 9800, matchScore: 73, interviewRate: 16, offerRate: 5, responseTime: 6.9, trend: "→" },
+          { segment: "Master students", applications: 6200, matchScore: 80, interviewRate: 22, offerRate: 7, responseTime: 5.1, trend: "↑" },
+        ],
+        usUniversities: [
+          { id: "all", name: "All universities" },
+          { id: "mit", name: "MIT" },
+          { id: "stanford", name: "Stanford University" },
+          { id: "berkeley", name: "UC Berkeley" },
+          { id: "cmu", name: "Carnegie Mellon University" },
+          { id: "harvard", name: "Harvard University" },
+          { id: "umich", name: "University of Michigan" },
+          { id: "utexas", name: "University of Texas at Austin" },
+          { id: "uw", name: "University of Washington" },
+          { id: "gatech", name: "Georgia Institute of Technology" },
+        ],
+        employmentByUniversity: [
+          { school: "Stanford", rate: 78 },
+          { school: "MIT", rate: 76 },
+          { school: "Harvard", rate: 73 },
+          { school: "CMU", rate: 74 },
+          { school: "UC Berkeley", rate: 72 },
+          { school: "Georgia Tech", rate: 70 },
+          { school: "UW", rate: 69 },
+          { school: "UT Austin", rate: 67 },
+          { school: "UMich", rate: 66 },
+        ],
+        employmentByDegree: [
+          { degree: "PhD", rate: 81 },
+          { degree: "Master", rate: 74 },
+          { degree: "Bachelor", rate: 68 },
+        ],
+        employmentByMajor: [
+          { major: "Computer Science", rate: 79 },
+          { major: "Data Science", rate: 76 },
+          { major: "Electrical Engineering", rate: 71 },
+          { major: "Business / MBA", rate: 69 },
+          { major: "Economics", rate: 65 },
+          { major: "Psychology", rate: 62 },
+        ],
+        timeToJobByEducationLevel: [
+          { level: "Bachelor", months: 3.8 },
+          { level: "Master", months: 3.1 },
+          { level: "PhD", months: 2.4 },
+        ],
+        degreeFilterOptions: ["All", "Bachelor", "Master", "PhD"],
+        majorFilterOptions: [
+          "All",
+          "Computer Science",
+          "Business / MBA",
+          "Electrical Engineering",
+          "Data Science",
+          "Economics",
+          "Psychology",
+        ],
+        universityAIInsights: [
+          {
+            title: "Degree impact on hiring success",
+            body: "PhD holders see +9pp employment vs. bachelor in our 12‑month cohort; the gap narrows to +4pp for non‑technical roles where portfolio matters more than credentials.",
+            accent: "violet",
+          },
+          {
+            title: "Skill gaps by major",
+            body: "CS & Data Science grads lacking production ML or SQL underperform peers by 18% in callback rate; Business majors miss modeling—candidates with spreadsheet + SQL certs close 22% more offers.",
+            accent: "amber",
+          },
+          {
+            title: "Technical vs non-technical",
+            body: "Technical roles show higher salary variance by school tier; non-technical placements are more uniform—networking and case interview prep drive 31% of variance outside eng/product tracks.",
+            accent: "emerald",
+          },
+        ],
+        recruitmentInsights: {
+          timeToHireDays: 21,
+          qualityScore: 7.8,
+          bestSource: { name: "HireMind AI matching", pct: 45 },
+        },
+        companyMatchThresholds: [
+          { company: "Google", companyType: "Big Tech", minMatch: 90 },
+          { company: "Meta", companyType: "Big Tech", minMatch: 88 },
+          { company: "Goldman Sachs", companyType: "Finance", minMatch: 86 },
+          { company: "Stripe", companyType: "Growth Tech", minMatch: 85 },
+          { company: "Databricks", companyType: "Growth Tech", minMatch: 84 },
+          { company: "Series A startup", companyType: "Startup", minMatch: 70 },
+          { company: "Seed startup", companyType: "Startup", minMatch: 65 },
+        ],
+        crossEmployerCandidate: {
+          name: "Jordan Park",
+          role: "Software Engineer",
+          baseSkills: "Python, React, AWS",
+          rows: [
+            { employer: "Google", companyType: "Big Tech", match: 88, response: "Recruiter screen", minBar: 90 },
+            { employer: "Meta", companyType: "Big Tech", match: 86, response: "Applied — queue", minBar: 88 },
+            { employer: "Stripe", companyType: "Growth Tech", match: 91, response: "Interview scheduled", minBar: 85 },
+            { employer: "Nimbus Labs (Series A)", companyType: "Startup", match: 92, response: "Offer extended", minBar: 70 },
+          ],
+        },
+        matchScoreVsResponseRate: [
+          { match: 58, responseRate: 6 },
+          { match: 62, responseRate: 8 },
+          { match: 66, responseRate: 11 },
+          { match: 70, responseRate: 15 },
+          { match: 74, responseRate: 19 },
+          { match: 78, responseRate: 24 },
+          { match: 82, responseRate: 29 },
+          { match: 86, responseRate: 34 },
+          { match: 90, responseRate: 38 },
+          { match: 94, responseRate: 42 },
+        ],
+        recruitmentAIInsights: [
+          {
+            title: "Selectiveness by company type",
+            body: "Big Tech median minimum match is 88; growth-stage product companies cluster at 83–86; seed–Series A startups accept ~65–72 when culture fit and velocity signals are strong.",
+            accent: "blue",
+          },
+          {
+            title: "Minimum match for callbacks",
+            body: "Across 4.2k outcomes, first human touch correlates with match ≥78 for finance, ≥82 for Big Tech SWE, and ≥68 for early-stage startups—below that, automation rarely escalates.",
+            accent: "violet",
+          },
+          {
+            title: "Improving match score",
+            body: "Top lifts: align skills section to JD keywords (+4–7 pts), add measurable impact bullets (+3–5), complete skills assessments (+6), and tailor one role-specific paragraph in the summary (+2–4).",
+            accent: "emerald",
+          },
+        ],
+      };
+
+      document.getElementById("segment-ai-inline").textContent = DATA.segmentAIInsight;
+
+      var BASE_SEGMENT_ROWS = JSON.parse(JSON.stringify(DATA.segments));
+      var BASE_KPI = JSON.parse(JSON.stringify(DATA.kpi));
+      var BASE_GROWTH = JSON.parse(JSON.stringify(DATA.growth));
+      var BASE_FUNNEL = JSON.parse(JSON.stringify(DATA.funnel));
+
+      var RANGE_SCALE = { "7d": 0.08, "30d": 0.28, "3m": 0.55, "6m": 1.0, "12m": 1.12 };
+      var INDUSTRY_VOLUME = { All: 1, Tech: 1.1, Finance: 0.95, Marketing: 0.9, Design: 0.85, Operations: 0.8 };
+      var DEFAULT_INDUSTRY = "All";
+      var DEFAULT_RANGE = "6m";
+      var DEFAULT_COMPARISON = "week";
+      var appliedIndustry = DEFAULT_INDUSTRY;
+      var appliedRange = DEFAULT_RANGE;
+      var appliedComparison = DEFAULT_COMPARISON;
+
+      var COMPARISON_VS_LABEL = {
+        day: "vs yesterday",
+        week: "vs last week",
+        month: "vs last month",
+        quarter: "vs last quarter",
+        year: "vs last year",
+      };
+      var KPI_DELTAS = {
+        day: { seekers: { pct: 12 }, active: { pct: 4 }, apps: { pct: 14 }, interview: { pp: 2 }, offer: { pp: -1 } },
+        week: { seekers: { pct: 5 }, active: { pct: 5 }, apps: { pct: 6 }, interview: { pp: 1 }, offer: { pp: 0 } },
+        month: { seekers: { pct: 18 }, active: { pct: 7 }, apps: { pct: 18 }, interview: { pp: 2 }, offer: { pp: -1 } },
+        quarter: { seekers: { pct: 8 }, active: { pct: 4 }, apps: { pct: 11 }, interview: { pp: 2 }, offer: { pp: 1 } },
+        year: { seekers: { pct: 22 }, active: { pct: 9 }, apps: { pct: 15 }, interview: { pp: -1 }, offer: { pp: -1 } },
+      };
+      function shortComparisonHint(period) {
+        var map = {
+          day: "Deltas vs yesterday",
+          week: "Deltas vs last week",
+          month: "Deltas vs last month",
+          quarter: "Deltas vs last quarter",
+          year: "Deltas vs last year",
+        };
+        return map[period];
+      }
+      function appendComparisonHint(base, period) {
+        return base + " · " + shortComparisonHint(period);
+      }
+      function applyComparisonDeltas(items, period, industry, range) {
+        var vs = COMPARISON_VS_LABEL[period];
+        var vf = RANGE_SCALE[range] * INDUSTRY_VOLUME[industry];
+        var rangeAdj = 0.75 + 0.25 * Math.min(vf, 1.2);
+        var indAdj =
+          industry === "All" ? 1 : industry === "Tech" ? 1.04 : industry === "Finance" ? 1.02 : 0.97;
+        return items.map(function (item) {
+          var row = KPI_DELTAS[period][item.id];
+          var isRate = item.suffix === "%";
+          var raw = isRate
+            ? Math.round(((row.pp != null ? row.pp : 0) * rangeAdj * indAdj) * 10) / 10
+            : Math.round((row.pct != null ? row.pct : 0) * rangeAdj * indAdj);
+          var deltaFlat = raw === 0;
+          var up = raw > 0;
+          return {
+            id: item.id,
+            label: item.label,
+            value: item.value,
+            spark: item.spark,
+            suffix: item.suffix,
+            change: Math.abs(raw),
+            deltaUnit: isRate ? "pp" : "pct",
+            deltaFlat: deltaFlat,
+            up: up,
+            comparisonVs: vs,
+          };
+        });
+      }
+
+      function round(n) {
+        return Math.round(n);
+      }
+      function clamp(n, min, max) {
+        return Math.min(max, Math.max(min, n));
+      }
+      function segmentIndustryBoost(segment, industry) {
+        if (industry === "All") return 1;
+        var s = segment.toLowerCase();
+        if (industry === "Tech") {
+          if (s.indexOf("tech") >= 0 || s.indexOf("ai-assisted") >= 0 || s.indexOf("master") >= 0) return 1.14;
+          if (s.indexOf("without ai") >= 0) return 0.92;
+          return 0.9;
+        }
+        if (industry === "Finance" && s.indexOf("finance") >= 0) return 1.16;
+        if (industry === "Marketing" && s.indexOf("marketing") >= 0) return 1.16;
+        if (industry === "Design" && (s.indexOf("marketing") >= 0 || s.indexOf("tech") >= 0)) return 1.08;
+        if (industry === "Operations" && (s.indexOf("bachelor") >= 0 || s.indexOf("master") >= 0)) return 1.08;
+        return 0.88;
+      }
+      function scaleSegments(rows, industry, range) {
+        var rs = RANGE_SCALE[range];
+        return rows.map(function (r) {
+          var boost = segmentIndustryBoost(r.segment, industry);
+          var apps = Math.max(120, round(r.applications * rs * boost));
+          var matchScore = clamp(
+            round(r.matchScore + (industry === "Tech" && r.segment.indexOf("AI") >= 0 ? 1 : 0) + (range === "7d" ? -1 : 0)),
+            55,
+            94
+          );
+          var interviewRate = clamp(round(r.interviewRate * (0.92 + 0.08 * boost)), 8, 35);
+          var offerRate = clamp(round(r.offerRate * (0.9 + 0.1 * boost)), 2, 14);
+          var responseTime = clamp(Number((r.responseTime * (1.05 - 0.05 * boost)).toFixed(1)), 3.5, 9.5);
+          return {
+            segment: r.segment,
+            applications: apps,
+            matchScore: matchScore,
+            interviewRate: interviewRate,
+            offerRate: offerRate,
+            responseTime: responseTime,
+            trend: r.trend,
+          };
+        });
+      }
+      function buildKpi(industry, range, period) {
+        var vf = RANGE_SCALE[range] * INDUSTRY_VOLUME[industry];
+        var pctAdjust = 0.88 + 0.12 * Math.min(1.2, vf);
+        var items = BASE_KPI.map(function (k) {
+          var baseVal = k.value;
+          var scaled =
+            k.suffix === "%"
+              ? clamp(round(baseVal * pctAdjust + (industry === "Tech" && k.id === "interview" ? 0.8 : 0)), 4, 42)
+              : round(baseVal * vf);
+          var ratio = baseVal === 0 ? 1 : scaled / baseVal;
+          var spark = k.spark.map(function (p) {
+            return round(p * ratio);
+          });
+          return {
+            id: k.id,
+            label: k.label,
+            value: scaled,
+            spark: spark,
+            suffix: k.suffix,
+          };
+        });
+        return applyComparisonDeltas(items, period, industry, range);
+      }
+      function buildFunnel(industry, range) {
+        var vf = RANGE_SCALE[range] * INDUSTRY_VOLUME[industry];
+        return BASE_FUNNEL.map(function (step) {
+          return { name: step.name, value: Math.max(40, round(step.value * vf)), fill: step.fill };
+        });
+      }
+      var BASE_APP_INDUSTRY = JSON.parse(JSON.stringify(DATA.industries));
+      function buildApplicationsByIndustry(industry, range) {
+        var vf = RANGE_SCALE[range] * INDUSTRY_VOLUME[industry];
+        return BASE_APP_INDUSTRY.map(function (row) {
+          var boost = industry === "All" ? 1 : row.industry === industry ? 1.28 : 0.72;
+          return { industry: row.industry, value: Math.max(80, round(row.value * vf * boost)) };
+        });
+      }
+      function buildIndustrySharePie(industry, range) {
+        var rows = buildApplicationsByIndustry(industry, range);
+        var fills = ["#6366f1", "#4f7ffb", "#57b885", "#eaa234", "#dc534d"];
+        return rows.map(function (r, i) {
+          return { name: r.industry, value: r.value, fill: fills[i] || fills[0] };
+        });
+      }
+      function buildUserGrowth(industry, range) {
+        var vf = RANGE_SCALE[range] * INDUSTRY_VOLUME[industry];
+        var firstU = BASE_GROWTH[0].users;
+        var lastU = BASE_GROWTH[BASE_GROWTH.length - 1].users;
+        var templates = {
+          "7d": [
+            { label: "Mon", t: 0 },
+            { label: "Tue", t: 0.15 },
+            { label: "Wed", t: 0.28 },
+            { label: "Thu", t: 0.42 },
+            { label: "Fri", t: 0.55 },
+            { label: "Sat", t: 0.68 },
+            { label: "Sun", t: 1 },
+          ],
+          "30d": [
+            { label: "W1", t: 0 },
+            { label: "W2", t: 0.22 },
+            { label: "W3", t: 0.48 },
+            { label: "W4", t: 0.72 },
+            { label: "W5", t: 1 },
+          ],
+          "3m": [
+            { label: "W1", t: 0 },
+            { label: "W4", t: 0.25 },
+            { label: "W8", t: 0.5 },
+            { label: "W12", t: 1 },
+          ],
+          "6m": BASE_GROWTH.map(function (d, i, arr) {
+            return { label: d.month, t: i / Math.max(1, arr.length - 1) };
+          }),
+          "12m": [
+            { label: "Jan", t: 0 },
+            { label: "Feb", t: 0.09 },
+            { label: "Mar", t: 0.18 },
+            { label: "Apr", t: 0.27 },
+            { label: "May", t: 0.36 },
+            { label: "Jun", t: 0.45 },
+            { label: "Jul", t: 0.54 },
+            { label: "Aug", t: 0.63 },
+            { label: "Sep", t: 0.72 },
+            { label: "Oct", t: 0.81 },
+            { label: "Nov", t: 0.9 },
+            { label: "Dec", t: 1 },
+          ],
+        };
+        var series = templates[range];
+        return series.map(function (p) {
+          return { month: p.label, users: Math.max(800, round((firstU + (lastU - firstU) * p.t) * vf)) };
+        });
+      }
+      function growthChartSubtitle(range) {
+        var map = {
+          "7d": "Registered job seekers — last 7 days",
+          "30d": "Registered job seekers — last 30 days",
+          "3m": "Registered job seekers — last 3 months",
+          "6m": "Registered job seekers — last 6 months",
+          "12m": "Registered job seekers — last 12 months",
+        };
+        return map[range];
+      }
+      function funnelSubtitle(range) {
+        var map = {
+          "7d": "Signups → applied → interview → offer (last 7 days)",
+          "30d": "Signups → applied → interview → offer (last 30 days)",
+          "3m": "Signups → applied → interview → offer (last 3 months)",
+          "6m": "Signups → applied → interview → offer",
+          "12m": "Signups → applied → interview → offer (last 12 months)",
+        };
+        return map[range];
+      }
+      function getDashboardSnapshot(industry, range, comparison) {
+        return {
+          kpi: buildKpi(industry, range, comparison),
+          userGrowth: buildUserGrowth(industry, range),
+          funnel: buildFunnel(industry, range),
+          segments: scaleSegments(BASE_SEGMENT_ROWS, industry, range),
+          applicationsByIndustry: buildApplicationsByIndustry(industry, range),
+          industrySharePie: buildIndustrySharePie(industry, range),
+          growthSubtitle: appendComparisonHint(growthChartSubtitle(range), comparison),
+          funnelSub: appendComparisonHint(funnelSubtitle(range), comparison),
+          comparisonHintShort: shortComparisonHint(comparison),
+        };
+      }
+
+      var dashboardSnapshot = getDashboardSnapshot(appliedIndustry, appliedRange, appliedComparison);
+      var sparkCharts = [];
+
+      function fmt(n, k) {
+        if (k.suffix === "%") return n + "%";
+        return n.toLocaleString("en-US");
+      }
+
+      function formatDeltaText(k) {
+        if (k.deltaFlat) return k.deltaUnit === "pct" ? "0%" : "0pp";
+        var sign = k.up ? "+" : "−";
+        return k.deltaUnit === "pct" ? sign + k.change + "%" : sign + k.change + "pp";
+      }
+
+      var kpiRow = document.getElementById("kpi-row");
+      function renderKpiRow(kpi) {
+        sparkCharts.forEach(function (c) {
+          c.destroy();
+        });
+        sparkCharts = [];
+        kpiRow.innerHTML = "";
+        kpi.forEach(function (k, idx) {
+          var div = document.createElement("div");
+          div.className = "glass-panel p-4";
+          var flat = k.deltaFlat;
+          var badgeCls = flat
+            ? "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+            : k.up
+              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400"
+              : "bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400";
+          var deltaText = formatDeltaText(k);
+          div.innerHTML =
+            '<p class="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">' +
+            k.label +
+            '</p><div class="mt-1 flex items-end justify-between gap-2"><p class="font-mono text-2xl font-semibold">' +
+            fmt(k.value, k) +
+            '</p><div class="flex flex-col items-end gap-0.5"><span class="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 font-mono text-xs font-semibold ' +
+            badgeCls +
+            '">' +
+            deltaText +
+            '</span><span class="max-w-[9rem] text-right text-[10px] font-medium leading-tight text-zinc-500 dark:text-zinc-400">' +
+            k.comparisonVs +
+            "</span></div></div><div class=\"mt-3 h-10\"><canvas id=\"spark-" +
+            idx +
+            '"></canvas></div>';
+          kpiRow.appendChild(div);
+          var ctx = document.getElementById("spark-" + idx).getContext("2d");
+          var ch = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: k.spark.map(function (_, i) {
+                return i;
+              }),
+              datasets: [
+                {
+                  data: k.spark,
+                  borderColor: "#6366f1",
+                  backgroundColor: "rgba(99,102,241,0.15)",
+                  fill: true,
+                  tension: 0.35,
+                  pointRadius: 0,
+                  borderWidth: 1.5,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false }, tooltip: { enabled: false } },
+              scales: { x: { display: false }, y: { display: false } },
+            },
+          });
+          sparkCharts.push(ch);
+        });
+      }
+
+      function renderFunnel(funnel) {
+        var fw = document.getElementById("funnel-wrap");
+        fw.innerHTML = "";
+        var maxF = funnel[0].value;
+        funnel.forEach(function (step) {
+          var pct = Math.round((step.value / maxF) * 100);
+          var row = document.createElement("div");
+          row.innerHTML =
+            '<div class="mb-1 flex items-center justify-between text-xs"><span class="font-medium">' +
+            step.name +
+            '</span><span class="font-mono font-semibold tabular-nums">' +
+            step.value.toLocaleString("en-US") +
+            '</span></div><div class="h-9 overflow-hidden rounded-lg bg-brand-50/80 dark:bg-zinc-800/80"><div class="flex h-full items-center justify-end rounded-lg px-2 text-[10px] font-semibold text-white/95" style="width:' +
+            pct +
+            "%;min-width:2.5rem;background-color:" +
+            step.fill +
+            '">' +
+            pct +
+            "%</div></div>";
+          fw.appendChild(row);
+        });
+      }
+
+      function refreshDashboardFromSnapshot() {
+        dashboardSnapshot = getDashboardSnapshot(appliedIndustry, appliedRange, appliedComparison);
+        renderKpiRow(dashboardSnapshot.kpi);
+        renderFunnel(dashboardSnapshot.funnel);
+        document.getElementById("growth-sub").textContent = dashboardSnapshot.growthSubtitle;
+        document.getElementById("funnel-sub").textContent = dashboardSnapshot.funnelSub;
+        var segHint = document.getElementById("segment-kpi-hint");
+        if (segHint) {
+          segHint.textContent = "KPI change badges use " + dashboardSnapshot.comparisonHintShort + ".";
+        }
+        buildCharts();
+        renderTable();
+      }
+
+      renderKpiRow(dashboardSnapshot.kpi);
+      renderFunnel(dashboardSnapshot.funnel);
+      document.getElementById("growth-sub").textContent = dashboardSnapshot.growthSubtitle;
+      document.getElementById("funnel-sub").textContent = dashboardSnapshot.funnelSub;
+      (function () {
+        var h = document.getElementById("segment-kpi-hint");
+        if (h) h.textContent = "KPI change badges use " + dashboardSnapshot.comparisonHintShort + ".";
+      })();
+      document.getElementById("comparison-period").value = appliedComparison;
+
+      function gridColor() {
+        return document.documentElement.classList.contains("dark") ? "rgba(255,255,255,0.06)" : "#e3e8ee";
+      }
+
+      let chartGrowth, chartBar, chartPie;
+      function buildCharts() {
+        const g = document.getElementById("chart-growth").getContext("2d");
+        if (chartGrowth) chartGrowth.destroy();
+        chartGrowth = new Chart(g, {
+          type: "line",
+          data: {
+            labels: dashboardSnapshot.userGrowth.map(function (d) { return d.month; }),
+            datasets: [
+              {
+                label: "Users",
+                data: dashboardSnapshot.userGrowth.map(function (d) { return d.users; }),
+                borderColor: "#6366f1",
+                backgroundColor: "rgba(99,102,241,0.08)",
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2.5,
+                pointRadius: 3,
+                pointBackgroundColor: "#6366f1",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    return ctx.parsed.y.toLocaleString("en-US") + " users";
+                  },
+                },
+              },
+            },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+              y: {
+                grid: { color: gridColor },
+                ticks: {
+                  font: { family: "JetBrains Mono", size: 11 },
+                  callback: function (v) {
+                    return (v / 1000).toFixed(1) + "k";
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const b = document.getElementById("chart-bar").getContext("2d");
+        if (chartBar) chartBar.destroy();
+        chartBar = new Chart(b, {
+          type: "bar",
+          data: {
+            labels: dashboardSnapshot.applicationsByIndustry.map(function (d) { return d.industry; }),
+            datasets: [
+              {
+                label: "Applications",
+                data: dashboardSnapshot.applicationsByIndustry.map(function (d) { return d.value; }),
+                backgroundColor: ["#6366f1", "#4f7ffb", "#57b885", "#eaa234", "#dc534d"],
+                borderRadius: 6,
+                maxBarThickness: 48,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+              y: {
+                grid: { color: gridColor },
+                ticks: {
+                  font: { family: "JetBrains Mono", size: 11 },
+                  callback: function (v) {
+                    return v >= 1000 ? v / 1000 + "k" : v;
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const p = document.getElementById("chart-pie").getContext("2d");
+        if (chartPie) chartPie.destroy();
+        chartPie = new Chart(p, {
+          type: "doughnut",
+          data: {
+            labels: dashboardSnapshot.industrySharePie.map(function (d) { return d.name; }),
+            datasets: [
+              {
+                data: dashboardSnapshot.industrySharePie.map(function (d) { return d.value; }),
+                backgroundColor: dashboardSnapshot.industrySharePie.map(function (d) { return d.fill; }),
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "58%",
+            plugins: {
+              legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } },
+              tooltip: {
+                callbacks: {
+                  label: function (ctx) {
+                    const total = ctx.dataset.data.reduce(function (a, b) { return a + b; }, 0);
+                    const val = ctx.parsed;
+                    const pct = ((val / total) * 100).toFixed(1);
+                    return val.toLocaleString() + " (" + pct + "%)";
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      var SCHOOL_ID_TO_LABEL = {
+        mit: "MIT",
+        stanford: "Stanford",
+        berkeley: "UC Berkeley",
+        cmu: "CMU",
+        harvard: "Harvard",
+        umich: "UMich",
+        utexas: "UT Austin",
+        uw: "UW",
+        gatech: "Georgia Tech",
+      };
+
+      function getUniBars(schoolId) {
+        if (schoolId === "all") return DATA.employmentByUniversity;
+        var label = SCHOOL_ID_TO_LABEL[schoolId];
+        var one = DATA.employmentByUniversity.find(function (r) {
+          return r.school === label;
+        });
+        return one ? [one] : DATA.employmentByUniversity.slice(0, 1);
+      }
+
+      function getDegreeBars(degree) {
+        if (degree === "All") return DATA.employmentByDegree;
+        var row = DATA.employmentByDegree.find(function (d) {
+          return d.degree === degree;
+        });
+        return row ? [row] : DATA.employmentByDegree;
+      }
+
+      function getMajorBars(major) {
+        if (major === "All") return DATA.employmentByMajor;
+        var row = DATA.employmentByMajor.find(function (m) {
+          return m.major === major;
+        });
+        return row ? [row] : DATA.employmentByMajor;
+      }
+
+      function getTimeLine(degree) {
+        if (degree === "All") return DATA.timeToJobByEducationLevel;
+        return DATA.timeToJobByEducationLevel.filter(function (t) {
+          return t.level === degree;
+        });
+      }
+
+      function blendEmploymentRate(schoolId, degree, major) {
+        var parts = [];
+        if (schoolId !== "all") {
+          var lab = SCHOOL_ID_TO_LABEL[schoolId];
+          var u = DATA.employmentByUniversity.find(function (r) { return r.school === lab; });
+          if (u) parts.push(u.rate);
+        }
+        if (major !== "All") {
+          var m = DATA.employmentByMajor.find(function (r) { return r.major === major; });
+          if (m) parts.push(m.rate);
+        }
+        if (degree !== "All") {
+          var d = DATA.employmentByDegree.find(function (r) { return r.degree === degree; });
+          if (d) parts.push(d.rate);
+        }
+        if (parts.length === 0) return 72;
+        return Math.round(parts.reduce(function (a, b) { return a + b; }, 0) / parts.length);
+      }
+      function blendTimeToJob(schoolId, degree, major) {
+        var tj = 3.2;
+        if (degree !== "All") {
+          var tx = DATA.timeToJobByEducationLevel.find(function (x) { return x.level === degree; });
+          if (tx) tj = tx.months;
+        }
+        if (major !== "All") {
+          var stem = major === "Computer Science" || major === "Data Science" || major === "Electrical Engineering";
+          tj += stem ? -0.45 : major === "Business / MBA" || major === "Economics" ? 0.35 : 0.15;
+        }
+        if (schoolId !== "all" && ["mit", "stanford", "cmu", "berkeley"].indexOf(schoolId) >= 0) tj -= 0.4;
+        else if (schoolId === "harvard") tj += 0.2;
+        return Math.round(Math.min(5.8, Math.max(2.1, tj)) * 10) / 10;
+      }
+      function buildTopIndustries(schoolId, degree, major) {
+        var tech = 38;
+        var fin = 22;
+        var mkt = 14;
+        if (major === "Computer Science" || major === "Data Science" || major === "Electrical Engineering") {
+          tech += 20;
+          fin -= 4;
+          mkt -= 3;
+        } else if (major === "Business / MBA" || major === "Economics") {
+          tech -= 10;
+          fin += 14;
+          mkt += 2;
+        } else if (major === "Psychology") {
+          tech -= 8;
+          fin -= 2;
+          mkt += 10;
+        } else if (major !== "All") {
+          tech -= 4;
+          mkt += 3;
+        }
+        if (degree === "PhD") {
+          tech += 5;
+          fin += 2;
+        } else if (degree === "Bachelor") {
+          tech -= 4;
+          mkt += 5;
+        }
+        if (["mit", "stanford", "cmu", "gatech"].indexOf(schoolId) >= 0) {
+          tech += 9;
+          fin -= 2;
+        } else if (schoolId === "harvard") {
+          fin += 10;
+          tech -= 5;
+        } else if (schoolId === "berkeley" || schoolId === "utexas") {
+          tech += 4;
+        }
+        function cl(n, lo, hi) { return Math.min(hi, Math.max(lo, n)); }
+        var rows = [
+          { name: "Tech", pct: cl(tech, 10, 62) },
+          { name: "Finance", pct: cl(fin, 10, 48) },
+          { name: "Marketing", pct: cl(mkt, 8, 38) },
+        ].sort(function (a, b) { return b.pct - a.pct; });
+        var top2 = rows.slice(0, 2);
+        var sum = top2.reduce(function (a, r) { return a + r.pct; }, 0);
+        return top2.map(function (r) {
+          return { name: r.name, pct: Math.round((r.pct / sum) * 100) };
+        });
+      }
+      function buildCohortNote(schoolId, degree, major, er, months) {
+        var scope =
+          schoolId === "all"
+            ? "National blended cohort"
+            : "Focus: " + (SCHOOL_ID_TO_LABEL[schoolId] || "selected school");
+        var filters = [];
+        if (degree !== "All") filters.push(degree);
+        if (major !== "All") filters.push(major);
+        var filterBit =
+          filters.length > 0 ? " · Filters: " + filters.join(" + ") : " · No degree/major narrowing";
+        return scope + filterBit + " · Modeled placement ~" + er + "% · median " + months + " mo to offer.";
+      }
+      function getUniversitySummary(schoolId, degree, major) {
+        var employmentRate = Math.min(95, blendEmploymentRate(schoolId, degree, major));
+        var avgTimeToJob = blendTimeToJob(schoolId, degree, major);
+        var topIndustries = buildTopIndustries(schoolId, degree, major);
+        var cohortNote = buildCohortNote(schoolId, degree, major, employmentRate, avgTimeToJob);
+        return {
+          employmentRate: employmentRate,
+          avgTimeToJob: avgTimeToJob,
+          topIndustries: topIndustries,
+          cohortNote: cohortNote,
+        };
+      }
+
+      function rowsToCsv(headers, rows) {
+        function esc(v) {
+          var s = String(v);
+          if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+          return s;
+        }
+        return [headers.map(esc).join(",")]
+          .concat(
+            rows.map(function (row) {
+              return row.map(esc).join(",");
+            })
+          )
+          .join("\n");
+      }
+
+      function buildUniversityAnalyticsCsv(schoolId, degree, major) {
+        var uniBars = getUniBars(schoolId);
+        var degreeBars = getDegreeBars(degree);
+        var majorBars = getMajorBars(major);
+        var timeLine = getTimeLine(degree);
+        var summary = getUniversitySummary(schoolId, degree, major);
+        var parts = [];
+        parts.push("# HireMind — University analytics export");
+        parts.push("# Filters: school=" + schoolId + ", degree=" + degree + ", major=" + major);
+        parts.push("");
+        parts.push("# Summary KPIs");
+        var sumRows = [
+          ["employmentRate_pct", summary.employmentRate],
+          ["avgTimeToJob_months", summary.avgTimeToJob],
+        ];
+        summary.topIndustries.forEach(function (t, i) {
+          sumRows.push(["topIndustry_" + (i + 1) + "_name", t.name]);
+          sumRows.push(["topIndustry_" + (i + 1) + "_pct", t.pct]);
+        });
+        parts.push(rowsToCsv(["metric", "value"], sumRows));
+        parts.push("");
+        parts.push("# Employment rate by university");
+        parts.push(
+          rowsToCsv(
+            ["school", "employmentRate_pct"],
+            uniBars.map(function (r) {
+              return [r.school, r.rate];
+            })
+          )
+        );
+        parts.push("");
+        parts.push("# Employment rate by degree");
+        parts.push(
+          rowsToCsv(
+            ["degree", "employmentRate_pct"],
+            degreeBars.map(function (r) {
+              return [r.degree, r.rate];
+            })
+          )
+        );
+        parts.push("");
+        parts.push("# Employment rate by major");
+        parts.push(
+          rowsToCsv(
+            ["major", "employmentRate_pct"],
+            majorBars.map(function (r) {
+              return [r.major, r.rate];
+            })
+          )
+        );
+        parts.push("");
+        parts.push("# Time to job by education level");
+        parts.push(
+          rowsToCsv(
+            ["level", "medianMonths"],
+            timeLine.map(function (r) {
+              return [r.level, r.months];
+            })
+          )
+        );
+        return parts.join("\n");
+      }
+
+      function buildRecruitmentInsightsCsv() {
+        var ri = DATA.recruitmentInsights;
+        var ce = DATA.crossEmployerCandidate;
+        var parts = [];
+        parts.push("# HireMind — Recruitment insights export");
+        parts.push("");
+        parts.push("# Summary");
+        parts.push(
+          rowsToCsv(["metric", "value"], [
+            ["timeToHire_days", ri.timeToHireDays],
+            ["candidateQualityScore", ri.qualityScore],
+            ["bestSource_pct", ri.bestSource.pct],
+            ["bestSource_name", ri.bestSource.name],
+          ])
+        );
+        parts.push("");
+        parts.push("# Minimum match score by employer");
+        parts.push(
+          rowsToCsv(
+            ["company", "companyType", "minMatchScore"],
+            DATA.companyMatchThresholds.map(function (c) {
+              return [c.company, c.companyType, c.minMatch];
+            })
+          )
+        );
+        parts.push("");
+        parts.push("# Cross-employer comparison (example cohort)");
+        parts.push(
+          rowsToCsv(
+            ["candidateRole", "employer", "companyType", "match", "typicalBar", "outcome"],
+            ce.rows.map(function (r) {
+              return [ce.role, r.employer, r.companyType, r.match, r.minBar, r.response];
+            })
+          )
+        );
+        parts.push("");
+        parts.push("# Match score vs response rate (aggregate)");
+        parts.push(
+          rowsToCsv(
+            ["matchScore", "responseRate_pct"],
+            DATA.matchScoreVsResponseRate.map(function (r) {
+              return [r.match, r.responseRate];
+            })
+          )
+        );
+        return parts.join("\n");
+      }
+
+      function downloadTextFile(filename, text) {
+        var blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      var chartUniEmp,
+        chartUniDegree,
+        chartUniMajor,
+        chartUniTime,
+        chartRecBar,
+        chartRecScatter;
+
+      var uniAccentCls = {
+        violet: "border-violet-200/80 bg-violet-50/70 dark:border-violet-900/50 dark:bg-violet-950/30",
+        amber: "border-amber-200/80 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30",
+        emerald: "border-emerald-200/80 bg-emerald-50/70 dark:border-emerald-900/50 dark:bg-emerald-950/30",
+        blue: "border-blue-200/80 bg-blue-50/70 dark:border-blue-900/50 dark:bg-blue-950/30",
+      };
+
+      function populateUniversityRecruitmentDom() {
+        var schoolSel = document.getElementById("uni-school");
+        DATA.usUniversities.forEach(function (u) {
+          var opt = document.createElement("option");
+          opt.value = u.id;
+          opt.textContent = u.name;
+          schoolSel.appendChild(opt);
+        });
+        var degSel = document.getElementById("uni-degree");
+        DATA.degreeFilterOptions.forEach(function (d) {
+          var opt = document.createElement("option");
+          opt.value = d;
+          opt.textContent = d;
+          degSel.appendChild(opt);
+        });
+        var majSel = document.getElementById("uni-major");
+        DATA.majorFilterOptions.forEach(function (m) {
+          var opt = document.createElement("option");
+          opt.value = m;
+          opt.textContent = m;
+          majSel.appendChild(opt);
+        });
+
+        var uai = document.getElementById("uni-ai-grid");
+        DATA.universityAIInsights.forEach(function (ins) {
+          var div = document.createElement("div");
+          div.className =
+            "col-span-12 rounded-[12px] border p-4 md:col-span-6 xl:col-span-4 " +
+            (uniAccentCls[ins.accent] || uniAccentCls.violet);
+          div.innerHTML =
+            '<p class="text-sm font-semibold">' +
+            ins.title +
+            '</p><p class="mt-1 text-xs leading-relaxed text-zinc-600 dark:text-zinc-300">' +
+            ins.body +
+            "</p>";
+          uai.appendChild(div);
+        });
+
+        var ce = DATA.crossEmployerCandidate;
+        document.getElementById("rec-cross-intro").textContent =
+          ce.name +
+          " · " +
+          ce.role +
+          " · " +
+          ce.baseSkills;
+
+        var rtb = document.getElementById("rec-cross-tbody");
+        ce.rows.forEach(function (r) {
+          var tr = document.createElement("tr");
+          tr.className = "border-b border-border dark:border-zinc-800";
+          tr.innerHTML =
+            '<td class="px-3 py-2 font-medium">' +
+            r.employer +
+            '</td><td class="px-3 py-2 text-zinc-500">' +
+            r.companyType +
+            '</td><td class="px-3 py-2 font-mono">' +
+            r.match +
+            '</td><td class="px-3 py-2 font-mono text-zinc-500">' +
+            r.minBar +
+            '</td><td class="px-3 py-2">' +
+            r.response +
+            "</td>";
+          rtb.appendChild(tr);
+        });
+
+        var rai = document.getElementById("rec-ai-grid");
+        DATA.recruitmentAIInsights.forEach(function (ins) {
+          var div = document.createElement("div");
+          div.className =
+            "col-span-12 rounded-[12px] border p-4 md:col-span-6 xl:col-span-4 " +
+            (uniAccentCls[ins.accent] || uniAccentCls.blue);
+          div.innerHTML =
+            '<p class="text-sm font-semibold">' +
+            ins.title +
+            '</p><p class="mt-1 text-xs leading-relaxed text-zinc-600 dark:text-zinc-300">' +
+            ins.body +
+            "</p>";
+          rai.appendChild(div);
+        });
+      }
+
+      populateUniversityRecruitmentDom();
+
+      function buildUniversityCharts() {
+        var schoolId = document.getElementById("uni-school").value;
+        var degree = document.getElementById("uni-degree").value;
+        var major = document.getElementById("uni-major").value;
+        var summary = getUniversitySummary(schoolId, degree, major);
+        document.getElementById("uni-kpi-er").textContent = summary.employmentRate + "%";
+        document.getElementById("uni-kpi-tj").textContent = String(summary.avgTimeToJob);
+        document.getElementById("uni-cohort-note").textContent = summary.cohortNote;
+        var topUl = document.getElementById("uni-top-industries");
+        topUl.innerHTML = "";
+        summary.topIndustries.forEach(function (row) {
+          var li = document.createElement("li");
+          li.className = "flex justify-between font-mono";
+          li.innerHTML =
+            '<span class="font-sans font-medium">' + row.name + "</span> " + row.pct + "%";
+          topUl.appendChild(li);
+        });
+
+        document.getElementById("uni-sub-degree").textContent =
+          degree === "All" ? "All degree levels" : degree + " only";
+        document.getElementById("uni-sub-major").textContent = major === "All" ? "All majors" : major + " only";
+        document.getElementById("uni-sub-time").textContent =
+          degree === "All" ? "All levels" : degree + " track";
+
+        var uniBars = getUniBars(schoolId);
+        var degreeBars = getDegreeBars(degree);
+        var majorBars = getMajorBars(major);
+        var timeLine = getTimeLine(degree);
+
+        var brand = "#6366f1";
+        var gc = gridColor();
+
+        if (chartUniEmp) chartUniEmp.destroy();
+        chartUniEmp = new Chart(document.getElementById("chart-uni-employment").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: uniBars.map(function (r) {
+              return r.school;
+            }),
+            datasets: [
+              {
+                label: "Employment %",
+                data: uniBars.map(function (r) {
+                  return r.rate;
+                }),
+                backgroundColor: brand,
+                borderRadius: 6,
+                maxBarThickness: 28,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                min: 0,
+                max: 100,
+                grid: { color: gc },
+                ticks: { font: { family: "JetBrains Mono", size: 10 } },
+              },
+              y: { grid: { display: false }, ticks: { font: { size: 10 } } },
+            },
+          },
+        });
+
+        if (chartUniDegree) chartUniDegree.destroy();
+        chartUniDegree = new Chart(document.getElementById("chart-uni-degree").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: degreeBars.map(function (r) {
+              return r.degree;
+            }),
+            datasets: [
+              {
+                label: "%",
+                data: degreeBars.map(function (r) {
+                  return r.rate;
+                }),
+                backgroundColor: brand,
+                borderRadius: 6,
+                maxBarThickness: 40,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+              y: {
+                min: 0,
+                max: 100,
+                grid: { color: gc },
+                ticks: { font: { family: "JetBrains Mono", size: 10 } },
+              },
+            },
+          },
+        });
+
+        if (chartUniMajor) chartUniMajor.destroy();
+        chartUniMajor = new Chart(document.getElementById("chart-uni-major").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: majorBars.map(function (r) {
+              return r.major;
+            }),
+            datasets: [
+              {
+                label: "%",
+                data: majorBars.map(function (r) {
+                  return r.rate;
+                }),
+                backgroundColor: "#4f7ffb",
+                borderRadius: 6,
+                maxBarThickness: 36,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 45 } },
+              y: {
+                min: 0,
+                max: 100,
+                grid: { color: gc },
+                ticks: { font: { family: "JetBrains Mono", size: 10 } },
+              },
+            },
+          },
+        });
+
+        if (chartUniTime) chartUniTime.destroy();
+        chartUniTime = new Chart(document.getElementById("chart-uni-time").getContext("2d"), {
+          type: "line",
+          data: {
+            labels: timeLine.map(function (r) {
+              return r.level;
+            }),
+            datasets: [
+              {
+                label: "Months",
+                data: timeLine.map(function (r) {
+                  return r.months;
+                }),
+                borderColor: "#57b885",
+                backgroundColor: "rgba(87,184,133,0.12)",
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: "#57b885",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+              y: {
+                grid: { color: gc },
+                ticks: { font: { family: "JetBrains Mono", size: 10 } },
+              },
+            },
+          },
+        });
+      }
+
+      function buildRecruitmentCharts() {
+        var gc = gridColor();
+        var th = DATA.companyMatchThresholds;
+
+        if (chartRecBar) chartRecBar.destroy();
+        chartRecBar = new Chart(document.getElementById("chart-rec-threshold").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: th.map(function (r) {
+              return r.company;
+            }),
+            datasets: [
+              {
+                label: "Min match",
+                data: th.map(function (r) {
+                  return r.minMatch;
+                }),
+                backgroundColor: "#6366f1",
+                borderRadius: 4,
+                maxBarThickness: 22,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                min: 50,
+                max: 100,
+                grid: { color: gc },
+                ticks: { font: { family: "JetBrains Mono", size: 10 } },
+              },
+              y: { grid: { display: false }, ticks: { font: { size: 9 } } },
+            },
+          },
+        });
+
+        var list = document.getElementById("rec-threshold-list");
+        list.innerHTML = "";
+        th.forEach(function (r) {
+          var li = document.createElement("li");
+          li.textContent = r.company + " (" + r.companyType + "): bar ≥ " + r.minMatch;
+          list.appendChild(li);
+        });
+
+        if (chartRecScatter) chartRecScatter.destroy();
+        var pts = DATA.matchScoreVsResponseRate.map(function (p) {
+          return { x: p.match, y: p.responseRate };
+        });
+        chartRecScatter = new Chart(document.getElementById("chart-rec-scatter").getContext("2d"), {
+          type: "scatter",
+          data: {
+            datasets: [
+              {
+                label: "Response %",
+                data: pts,
+                backgroundColor: "rgba(99,102,241,0.75)",
+                borderColor: "#6366f1",
+                pointRadius: 5,
+                pointHoverRadius: 7,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                title: { display: true, text: "Match score" },
+                grid: { color: gc },
+                ticks: { font: { family: "JetBrains Mono", size: 10 } },
+              },
+              y: {
+                title: { display: true, text: "Response rate %" },
+                grid: { color: gc },
+                ticks: { font: { family: "JetBrains Mono", size: 10 } },
+              },
+            },
+          },
+        });
+      }
+
+      ["uni-school", "uni-degree", "uni-major"].forEach(function (id) {
+        document.getElementById(id).addEventListener("change", buildUniversityCharts);
+      });
+      document.getElementById("btn-export-university").addEventListener("click", function () {
+        var schoolId = document.getElementById("uni-school").value;
+        var degree = document.getElementById("uni-degree").value;
+        var major = document.getElementById("uni-major").value;
+        downloadTextFile("hiremind-university-analytics.csv", buildUniversityAnalyticsCsv(schoolId, degree, major));
+      });
+      document.getElementById("btn-export-recruitment").addEventListener("click", function () {
+        downloadTextFile("hiremind-recruitment-insights.csv", buildRecruitmentInsightsCsv());
+      });
+
+      // Insights
+      const ig = document.getElementById("insights-grid");
+      DATA.insights.forEach(function (ins) {
+        const el = document.createElement("div");
+        el.className = "col-span-12 rounded-[12px] border p-4 md:col-span-6 xl:col-span-3 " + ins.cls;
+        el.innerHTML = '<p class="text-sm font-semibold">' + ins.title + '</p><p class="mt-1 text-xs leading-relaxed text-zinc-600 dark:text-zinc-300">' + ins.body + "</p>";
+        ig.appendChild(el);
+      });
+
+      function renderTable() {
+        const q = (document.getElementById("table-search").value || "").toLowerCase().trim();
+        const tf = document.getElementById("trend-filter").value;
+        const tbody = document.getElementById("app-tbody");
+        tbody.innerHTML = "";
+        const rows = dashboardSnapshot.segments.filter(function (r) {
+          if (tf !== "All" && r.trend !== tf) return false;
+          if (!q) return true;
+          return r.segment.toLowerCase().includes(q);
+        });
+        document.getElementById("table-count").textContent =
+          "Showing " + rows.length + " of " + dashboardSnapshot.segments.length + " segments";
+        rows.forEach(function (r) {
+          const tr = document.createElement("tr");
+          tr.className =
+            "border-b border-border transition hover:bg-brand-50/40 dark:border-zinc-800 dark:hover:bg-zinc-800/40";
+          const trendCls =
+            r.trend === "↑"
+              ? "text-emerald-600 dark:text-emerald-400"
+              : r.trend === "↓"
+                ? "text-red-600 dark:text-red-400"
+                : "text-zinc-400 dark:text-zinc-500";
+          tr.innerHTML =
+            '<td class="px-4 py-3 font-medium text-navy dark:text-zinc-100">' +
+            r.segment +
+            '</td><td class="px-4 py-3 font-mono text-sm font-semibold tabular-nums text-navy dark:text-white">' +
+            r.applications.toLocaleString("en-US") +
+            '</td><td class="px-4 py-3"><div class="flex items-center gap-2"><span class="font-mono text-sm font-semibold tabular-nums text-navy dark:text-white">' +
+            r.matchScore +
+            '</span><div class="h-1.5 w-20 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"><div class="h-full rounded-full bg-semantic-green" style="width:' +
+            r.matchScore +
+            '%"></div></div></div></td><td class="px-4 py-3 font-mono text-sm font-semibold tabular-nums text-navy dark:text-white">' +
+            r.interviewRate +
+            '%</td><td class="px-4 py-3 font-mono text-sm font-semibold tabular-nums text-navy dark:text-white">' +
+            r.offerRate +
+            '%</td><td class="px-4 py-3 font-mono text-sm font-semibold tabular-nums text-navy dark:text-white">' +
+            r.responseTime.toFixed(1) +
+            '</td><td class="px-4 py-3"><span class="font-mono text-lg font-bold leading-none ' +
+            trendCls +
+            '">' +
+            r.trend +
+            "</span></td>";
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById("trend-filter").addEventListener("change", renderTable);
+      var globalSearchEl = document.getElementById("global-search");
+      var tableSearchEl = document.getElementById("table-search");
+      globalSearchEl.addEventListener("input", function () {
+        tableSearchEl.value = globalSearchEl.value;
+        renderTable();
+      });
+      tableSearchEl.addEventListener("input", function () {
+        globalSearchEl.value = tableSearchEl.value;
+        renderTable();
+      });
+
+      // Theme
+      function applyTheme(dark) {
+        document.documentElement.classList.toggle("dark", dark);
+        localStorage.setItem("hiremind-theme", dark ? "dark" : "light");
+        document.getElementById("icon-sun").classList.toggle("hidden", !dark);
+        document.getElementById("icon-moon").classList.toggle("hidden", dark);
+        buildCharts();
+        buildUniversityCharts();
+        buildRecruitmentCharts();
+      }
+      document.getElementById("theme-toggle").addEventListener("click", function () {
+        applyTheme(!document.documentElement.classList.contains("dark"));
+      });
+      (function initTheme() {
+        var s = localStorage.getItem("hiremind-theme");
+        var dark = s === "dark" || (s !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        applyTheme(dark);
+      })();
+
+      // Sidebar
+      var collapsed = false;
+      document.getElementById("sidebar-toggle").addEventListener("click", function () {
+        collapsed = !collapsed;
+        var sb = document.getElementById("sidebar");
+        var mw = document.getElementById("main-wrap");
+        if (collapsed) {
+          sb.style.width = "72px";
+          mw.style.marginLeft = "72px";
+          document.querySelectorAll(".nav-label").forEach(function (el) {
+            el.classList.add("hidden");
+          });
+          document.getElementById("brand-text").classList.add("hidden");
+        } else {
+          sb.style.width = "240px";
+          mw.style.marginLeft = "240px";
+          document.querySelectorAll(".nav-label").forEach(function (el) {
+            el.classList.remove("hidden");
+          });
+          document.getElementById("brand-text").classList.remove("hidden");
+        }
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+          e.preventDefault();
+          document.getElementById("global-search").focus();
+        }
+        if (e.key === "Escape" && !document.getElementById("filter-overlay").classList.contains("hidden")) {
+          closeFilterPanel();
+        }
+      });
+
+      renderTable();
+
+      // Sidebar nav + page titles (match design)
+      var PAGE = {
+        dashboard: { title: "Dashboard", sub: "Welcome back, Alex. Here's what's happening today." },
+        "ai-insights": { title: "AI Insights", sub: "Model-generated signals you can act on this week." },
+        users: { title: "Users", sub: "Manage access, roles, and activity across your workspace." },
+        applications: { title: "Applications", sub: "Track candidate pipeline health and recruiter throughput." },
+        settings: { title: "Settings", sub: "Workspace preferences, notifications, and security." },
+      };
+
+      function setNavActive(nav) {
+        document.querySelectorAll("[data-nav]").forEach(function (b) {
+          var on = b.getAttribute("data-nav") === nav;
+          b.classList.toggle("bg-brand-500", on);
+          b.classList.toggle("text-white", on);
+          b.classList.toggle("shadow-sm", on);
+          b.classList.toggle("text-zinc-600", !on);
+          b.classList.toggle("hover:bg-zinc-100", !on);
+          b.classList.toggle("dark:text-zinc-400", !on);
+          b.classList.toggle("dark:hover:bg-zinc-800", !on);
+          if (b.getAttribute("data-nav") === "ai-insights") {
+            var dot = b.querySelector(".ai-dot");
+            if (dot) {
+              dot.classList.toggle("bg-semantic-blue", !on);
+              dot.classList.toggle("bg-white/90", on);
+            }
+          }
+        });
+      }
+
+      function showView(nav) {
+        var va = document.getElementById("view-dashboard");
+        var vu = document.getElementById("view-users");
+        var vs = document.getElementById("view-settings");
+        if (nav === "users") {
+          va.classList.add("hidden");
+          vu.classList.remove("hidden");
+          vs.classList.add("hidden");
+        } else if (nav === "settings") {
+          va.classList.add("hidden");
+          vu.classList.add("hidden");
+          vs.classList.remove("hidden");
+        } else {
+          va.classList.remove("hidden");
+          vu.classList.add("hidden");
+          vs.classList.add("hidden");
+        }
+        var p = PAGE[nav] || PAGE.dashboard;
+        document.getElementById("page-title").textContent = p.title;
+        document.getElementById("page-sub").textContent = p.sub;
+      }
+
+      document.querySelectorAll("[data-nav]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var nav = btn.getAttribute("data-nav");
+          setNavActive(nav);
+          showView(nav);
+          if (nav === "ai-insights") document.getElementById("section-insights").scrollIntoView({ behavior: "smooth", block: "start" });
+          if (nav === "applications") document.getElementById("section-apps").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+      setNavActive("dashboard");
+
+      document.getElementById("logout-btn").addEventListener("click", function () {
+        alert("Logout is a demo — connect to your auth provider.");
+      });
+      function openFilterPanel() {
+        document.getElementById("filter-draft-industry").value = appliedIndustry;
+        document.getElementById("filter-draft-range").value = appliedRange;
+        var ov = document.getElementById("filter-overlay");
+        ov.classList.remove("hidden");
+        ov.classList.add("flex");
+      }
+      function closeFilterPanel() {
+        var ov = document.getElementById("filter-overlay");
+        ov.classList.add("hidden");
+        ov.classList.remove("flex");
+      }
+      document.getElementById("comparison-period").addEventListener("change", function () {
+        appliedComparison = document.getElementById("comparison-period").value;
+        refreshDashboardFromSnapshot();
+        buildUniversityCharts();
+        buildRecruitmentCharts();
+      });
+      document.getElementById("btn-filters").addEventListener("click", openFilterPanel);
+      document.getElementById("filter-backdrop").addEventListener("click", closeFilterPanel);
+      document.getElementById("filter-close-x").addEventListener("click", closeFilterPanel);
+      document.getElementById("filter-close-btn").addEventListener("click", closeFilterPanel);
+      document.getElementById("filter-apply").addEventListener("click", function () {
+        appliedIndustry = document.getElementById("filter-draft-industry").value;
+        appliedRange = document.getElementById("filter-draft-range").value;
+        refreshDashboardFromSnapshot();
+        buildUniversityCharts();
+        buildRecruitmentCharts();
+        closeFilterPanel();
+      });
+      document.getElementById("filter-reset").addEventListener("click", function () {
+        appliedIndustry = DEFAULT_INDUSTRY;
+        appliedRange = DEFAULT_RANGE;
+        document.getElementById("filter-draft-industry").value = appliedIndustry;
+        document.getElementById("filter-draft-range").value = appliedRange;
+        refreshDashboardFromSnapshot();
+        buildUniversityCharts();
+        buildRecruitmentCharts();
+      });
+      document.getElementById("btn-export").addEventListener("click", function () {
+        var headers = ["segment", "totalApplications", "avgMatchScore", "interviewRate", "offerRate", "avgResponseTimeDays", "trend"];
+        var lines = [headers.join(",")].concat(
+          dashboardSnapshot.segments.map(function (r) {
+            return [
+              '"' + r.segment.replace(/"/g, '""') + '"',
+              r.applications,
+              r.matchScore,
+              r.interviewRate,
+              r.offerRate,
+              r.responseTime,
+              '"' + r.trend + '"',
+            ].join(",");
+          })
+        );
+        var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "hiremind-platform-performance-by-segment.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    </script>
+  </body>
+</html>

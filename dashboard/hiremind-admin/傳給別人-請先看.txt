@@ -1,0 +1,21 @@
+【給專案擁有者：如何打出「含依賴」的完整壓縮檔】
+
+1. 電腦須已安裝 Node.js（建議 LTS）：https://nodejs.org/
+
+2. 解壓本資料夾後，雙擊執行：
+     pack-for-sharing.bat
+   或在資料夾內開 PowerShell 執行：
+     .\pack-for-sharing.ps1
+
+3. 腳本會自動執行 npm install，並在「下載」資料夾產生：
+     hiremind-dashboard-FULL-日期時間.zip
+   該檔即為含 node_modules 的完整專案，可傳給別人。
+
+【給收到壓縮檔的人】
+
+1. 解壓縮
+2. 若壓縮檔已含 node_modules：可直接在專案目錄執行 npm run dev
+3. 若沒有 node_modules：在專案目錄執行 npm install，再 npm run dev
+
+說明：含 node_modules 的壓縮檔較大；若對方也是 Windows 且 Node 版本相近，通常可直接用。
+若對方是 Mac/Linux，建議只傳原始碼（不含 node_modules），由對方自行 npm install。
