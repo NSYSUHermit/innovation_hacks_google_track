@@ -50,24 +50,31 @@ export default function App() {
 
   // 無資料庫同步法：攔截 URL 上的資料
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash.startsWith('#syncJob=')) {
-      try {
-        const encodedData = hash.substring(9); // 更穩定的截取方式，避免字串替換失誤
-        const decodedStr = decodeURIComponent(atob(encodedData));
-        const newJob = JSON.parse(decodedStr);
-        
-        setJobs(prevJobs => {
-          if (prevJobs.some(j => j.id === newJob.id)) return prevJobs; // 防止重複加入
-          return [newJob, ...prevJobs]; // 將 AI 產生的資料放在最前面
-        });
+    const syncDataFromHash = () => {
+      // 使用 href.split 抓取原始字串，避免瀏覽器對 hash 自動 Decode 造成的崩潰
+      const rawHash = window.location.href.split('#syncToken=')[1];
+      if (rawHash) {
+        try {
+          // 解析偽裝成加密 Token 的 Base64 字串
+          const decodedStr = decodeURIComponent(atob(rawHash));
+          const newJob = JSON.parse(decodedStr);
+          
+          setJobs(prevJobs => {
+            if (prevJobs.some(j => j.id === newJob.id)) return prevJobs; // 防止重複加入
+            return [newJob, ...prevJobs]; // 將 AI 產生的資料放在最前面
+          });
 
-        // 讀取完畢後，把網址列清乾淨，看起來就像變魔術一樣
-        window.history.replaceState(null, '', window.location.pathname + window.location.search);
-      } catch (e) {
-        console.error('Failed to parse synced job data:', e);
+          // 讀取完畢後，把網址列清乾淨，看起來就像變魔術一樣
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch (e) {
+          console.error('Failed to parse synced job data:', e);
+        }
       }
-    }
+    };
+
+    syncDataFromHash(); // 初次載入時執行
+    window.addEventListener('hashchange', syncDataFromHash); // 監聽網址變化，確保已開啟的分頁也能秒速同步
+    return () => window.removeEventListener('hashchange', syncDataFromHash);
   }, []);
 
   const handleJobClick = (job: JobApplication, tab: 'overview' | 'jd' | 'channels' | 'notes' = 'overview') => {

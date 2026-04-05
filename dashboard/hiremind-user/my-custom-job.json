@@ -1,0 +1,34 @@
+{
+  "id": "app-10",
+  "jobTitle": "Engineer I, Field Software",
+  "company": "ASM",
+  "industry": "Tech",
+  "location": "Hillsboro, OR",
+  "experienceLevel": "Mid-Level",
+  "fitScore": 99,
+  "fitBreakdown": {
+    "skills": 100,
+    "experience": 95,
+    "industry": 100,
+    "visa": 100,
+    "gap": "Perfect Match"
+  },
+  "status": "Applied",
+  "selectedChannels": ["Company Website"],
+  "referral": true,
+  "appliedTime": "2026/05/15 10:00",
+  "resumeUrl": "#",
+  "coverLetterUrl": "#",
+  "notes": [
+  ],
+  "tags": [],
+  "jobDescription": {
+    "responsibilities": ["Design and build scalable Machine Learning pipelines.", "Optimize infrastructure for Gemini 3.0 models."],
+    "requirements": ["Strong proficiency in Python and C++.", "Experience with large-scale distributed systems."],
+    "skills": ["Python", "C++", "PyTorch", "Distributed Systems"],
+    "visaInfo": "Sponsorship Available"
+  },
+  "interviewTimeline": [],
+  "interviewProbability": 0.95,
+  "attempts": 1
+}
